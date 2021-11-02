@@ -26,7 +26,7 @@ doesn't aim to verify whether the string is *only* a phone number.
 If the input looks like a vanity number to the library, `parse()` assumes this
 is intentional and converts alpha characters to digits. Please read the
 documentation for `PhoneNumber parse(String, String)` in
-[PhoneNumberUtil](http://github.com/googlei18n/libphonenumber/blob/master/java/libphonenumber/src/com/google/i18n/phonenumbers/PhoneNumberUtil.java)
+[PhoneNumberUtil](http://github.com/google/libphonenumber/blob/master/java/libphonenumber/src/com/google/i18n/phonenumbers/PhoneNumberUtil.java)
 for details. Also see `Iterable<PhoneNumberMatch> findNumbers(CharSequence,
 String)`.
 
@@ -46,10 +46,10 @@ Some examples:
 
 Other examples, in reports:
 
-*   [#328](http://github.com/googlei18n/libphonenumber/issues/328)
-*   [#1001](http://github.com/googlei18n/libphonenumber/issues/1001)
-*   [#1199](http://github.com/googlei18n/libphonenumber/issues/1199)
-*   [#1813](http://github.com/googlei18n/libphonenumber/issues/1813)
+*   [#328](http://github.com/google/libphonenumber/issues/328)
+*   [#1001](http://github.com/google/libphonenumber/issues/1001)
+*   [#1199](http://github.com/google/libphonenumber/issues/1199)
+*   [#1813](http://github.com/google/libphonenumber/issues/1813)
 
 ### Why wasn't the national prefix removed when parsing?
 
@@ -88,7 +88,7 @@ gives `5417540000` for the national number.
 
 You can try [the demo](http://libphonenumber.appspot.com/) for more regions.
 Also see `internationalPrefix` in
-[`resources/PhoneNumberMetadata.xml`](http://github.com/googlei18n/libphonenumber/blob/master/resources/PhoneNumberMetadata.xml).
+[`resources/PhoneNumberMetadata.xml`](http://github.com/google/libphonenumber/blob/master/resources/PhoneNumberMetadata.xml).
 
 ## Validation and types of numbers
 
@@ -96,14 +96,14 @@ Also see `internationalPrefix` in
 
 To understand the behavior of functions, please refer to the documentation in
 the Javadoc/C++ header files. For example, see `isPossibleNumberWithReason` in
-[`PhoneNumberUtil`](https://github.com/googlei18n/libphonenumber/blob/master/java/libphonenumber/src/com/google/i18n/phonenumbers/PhoneNumberUtil.java).
+[`PhoneNumberUtil`](https://github.com/google/libphonenumber/blob/master/java/libphonenumber/src/com/google/i18n/phonenumbers/PhoneNumberUtil.java).
 
 ### Why does PhoneNumberUtil return false for valid short numbers?
 
 Short numbers are out of scope of
-[`PhoneNumberUtil`](https://github.com/googlei18n/libphonenumber/blob/master/java/libphonenumber/src/com/google/i18n/phonenumbers/PhoneNumberUtil.java).
+[`PhoneNumberUtil`](https://github.com/google/libphonenumber/blob/master/java/libphonenumber/src/com/google/i18n/phonenumbers/PhoneNumberUtil.java).
 For short numbers, use
-[`ShortNumberInfo`](https://github.com/googlei18n/libphonenumber/blob/master/java/libphonenumber/src/com/google/i18n/phonenumbers/ShortNumberInfo.java).
+[`ShortNumberInfo`](https://github.com/google/libphonenumber/blob/master/java/libphonenumber/src/com/google/i18n/phonenumbers/ShortNumberInfo.java).
 
 ### What does it mean for a phone number to be valid?
 
@@ -148,6 +148,24 @@ One use-case where this method may be useful is if you want to see if a
 `FIXED_LINE` number for a business matches the country it is in, to try and spot
 data errors.
 
+### Some "valid" numbers are not formatting correctly.
+
+This could be due to number simplification. In order to keep the size of the XML
+files to a reasonable level, it's necessary in some regions (e.g. "DE" or "AT")
+to simplify number ranges. This results in a relatively small amount of false
+positive numbers (i.e. numbers that should be reported as invalid, but which are
+now shown as valid).
+
+This issue here is that (for simplicity) only the number validity information is
+simplified; the formatting information in the XML (leading digits) retains its
+full accuracy and so doesn't cover these numbers.
+
+Note that while it is probably possible to address this and expand the format
+information to cover these numbers as well, it's a rather non-trivial task
+(since the leading digits must not be over simplified so as to capture other
+valid ranges with different formats). Note that this also applies to attributes
+like "national only" or geocoding information.
+
 ### What types of phone numbers can SMSs be sent to?
 
 SMSs can be sent to `MOBILE` or `FIXED_LINE_OR_MOBILE` numbers. However,
@@ -162,7 +180,7 @@ way.
 
 ### What is mobile number portability?
 
-The ability to keep your mobile phone number when changing carriers. To see whether a region supports mobile number portability use [isMobileNumberPortableRegion](https://github.com/googlei18n/libphonenumber/blob/master/java/libphonenumber/src/com/google/i18n/phonenumbers/PhoneNumberUtil.java#L3275).
+The ability to keep your mobile phone number when changing carriers. To see whether a region supports mobile number portability use [isMobileNumberPortableRegion](https://github.com/google/libphonenumber/blob/58247207903f917839001bc62525a5b48a475b7e/java/libphonenumber/src/com/google/i18n/phonenumbers/PhoneNumberUtil.java#L3524).
 
 ### Since it's possible to change the carrier for a phone number, how is the data kept up-to-date?
 
@@ -170,41 +188,21 @@ Not all regions support mobile number portability. For those that don't, we retu
 
 ### What about M2M (machine to machine) numbers?
 
-libphonenumber does not support M2M numbers at the moment, but might in the
-future.
+libphonenumber currently does not support M2M numbers, but might in the future.
 
-One of the reasons libphonenumber doesn't support M2M so far is because no one
-could explain their use to us sufficiently.
+The reason for Libphonenumber to not provide M2M support is related to the lack of standardization and the need for a new Util API (not in radar for the time being):
 
-We don't require that a number to be supported by the library has a human at the
-other end since we already accept premium rate services and they might go to an
-automated system instead. But to date we only accept ranges that a human might
-call or send an SMS to.
+- We understand that use cases for M2M are diverse. We don't require that a number to be supported by the library has a human at the other end since we already accept premium rate services and they might go to an automated system instead. But to date we only accept ranges that a human migh call or send an SMS to.
 
-M2M numbers would violate this assumption and we'd have to evaluate the
-consequences for existing APIs and clients if M2M numbers would be considered
-valid by the library. Clients of libphonenumber expect `mobile` and `fixed-line`
-numbers to have certain affordances, such as: Reachable for voice calls
-(and for mobile also SMS) as well as assuming standard cost. This expectation
-is broken by the lack of M2M standardization today.
+- M2M numbers would violate this assumption and we'd have to evaluate the consequences for existing APIs and clients if M2M numbers would be considered valid by the library. Clients of libphonenumber expect `mobile` and `fixed-line` numbers to have certain affordances, such as: Reachable for voice calls (and for mobile also SMS) as well as assuming standard cost. This expectation is broken by the lack of M2M standardization today.
 
-Many people use this library for formatting the numbers of their contacts, for
-allowing people to sign up for services, for working out how to dial someone in
-a different country, for working out what kind of cost might be associated with
-a number in an advert, etc. We don't think the lack of M2M support hinders any
+- Many people use this library for formatting the numbers of their contacts, for allowing people to sign up for services, for working out how to dial someone in
+a different country, for working out what kind of cost might be associated with  a number in an advert, etc. We don't think the lack of M2M support hinders any
 of those use-case, but we might be wrong.
 
-If you would like libphonenumber to support M2M numbers, please engage with the
-developer community at [Support M2M numbers](
-https://issuetracker.google.com/issues/74493346) with further
-information to address our questions and concerns such as:
+- Usually M2M numbers are at least 2-5 digits longer than the usual phone numbers in the respective regions. Accepting them under known categories will make isPossible() test even more lenient increasing the number of false positives. We would like to introduce it as separate Util like PhoneNumberUtil and ShortNumberInfo.
 
-*   **How to implement support?** e.g. new category, new library or method
-    to call - along with pros and cons, and impact on existing APIs
-*   **Authoritative and specific documentation** such as government sources since
-    we currently have less than a dozen sources, which have varied definitions
-
-More information and collabortation on this issue would be very welcomed!
+Conclusion: **Unfortunately we will not be able to commit for any deadline to support M2M numbers.** We recommend users to implement workarounds in their client code itself. Please engage with the developer community at [Support M2M numbers](https://issuetracker.google.com/issues/74493346) with further information.
 
 ### What about numbers that are only valid for a set of subscribers?
 
@@ -263,7 +261,7 @@ optional in local circumstances, but this is shifting to become mandatory
 in areas that have had more area code splits. However, the usage of
 parentheses persists and both methods are acceptable.
 
-See [issue #1996](https://github.com/googlei18n/libphonenumber/issues/1996)
+See [issue #1996](https://github.com/google/libphonenumber/issues/1996)
 for some additional discussion.
 
 ### Why does formatNumberForMobileDialing return an empty string for my number?
@@ -440,20 +438,20 @@ Set the compiler flag `USE_METADATA_LITE` to `ON` using ccmake or similar.
 The metadata binary files can be generated using the ant build rules
 `build-phone-metadata` and `build-short-metadata` with `lite-build` set to
 `true`. This can be set in the [build
-file](https://github.com/googlei18n/libphonenumber/blob/master/java/build.xml)
+file](https://github.com/google/libphonenumber/blob/master/java/build.xml)
 itself.
 
 ### Which versions of the Maven jars should I use?
 
 When possible, use the [latest
-version](https://github.com/googlei18n/libphonenumber/releases) of
+version](https://github.com/google/libphonenumber/releases) of
 libphonenumber.
 
 For the other Maven artifacts, to find the version corresponding to a given
 version of libphonenumber, follow these steps:
 
 *   Go to the versioned GitHub tag, e.g.
-    https://github.com/googlei18n/libphonenumber/find/v8.3.3
+    https://github.com/google/libphonenumber/find/v8.3.3
 *   Type `pom.xml`. This will surface all the `pom.xml` files as they were
     released at the chosen tag.
 *   Find the version you care about in the corresponding `pom.xml` file. Look
@@ -478,14 +476,14 @@ loading resources in the main thread is the suggested best practice at the
 [Android developer
 guide](http://developer.android.com/guide/components/processes-and-threads.html),
 and will prevent the issue reported in
-[#265](https://github.com/googlei18n/libphonenumber/issues/265),
-[#528](https://github.com/googlei18n/libphonenumber/issues/528), and
-[#819](https://github.com/googlei18n/libphonenumber/issues/819).
+[#265](https://github.com/google/libphonenumber/issues/265),
+[#528](https://github.com/google/libphonenumber/issues/528), and
+[#819](https://github.com/google/libphonenumber/issues/819).
 
 #### Optimize loads
 
 You can manage your own resources by supplying your own
-[`MetadataLoader`](http://github.com/googlei18n/libphonenumber/blob/master/java/libphonenumber/src/com/google/i18n/phonenumbers/MetadataLoader.java)
+[`MetadataLoader`](http://github.com/google/libphonenumber/blob/master/java/libphonenumber/src/com/google/i18n/phonenumbers/MetadataLoader.java)
 implementation to the `PhoneNumberUtil` instance. It is thus possible for your
 app to load the resources as Android assets, while libphonenumber loads Java
 resources by default. The result is that the files are read as native Android assets
@@ -516,14 +514,14 @@ or review and test out someone else's PR, please chime in on these links, or
 email the [discussion
 group](https://groups.google.com/group/libphonenumber-discuss):
 
-*   [#1000](https://github.com/googlei18n/libphonenumber/issues/1000) to provide
+*   [#1000](https://github.com/google/libphonenumber/issues/1000) to provide
     a Windows DLL.
-*   [#1010](https://github.com/googlei18n/libphonenumber/issues/1010) to require
+*   [#1010](https://github.com/google/libphonenumber/issues/1010) to require
     Visual Studio 2015 update 2 or later on Windows
-*   PR [#1090](https://github.com/googlei18n/libphonenumber/pull/1090) /
-    [#824](https://github.com/googlei18n/libphonenumber/issues/824) to "Replace
+*   PR [#1090](https://github.com/google/libphonenumber/pull/1090) /
+    [#824](https://github.com/google/libphonenumber/issues/824) to "Replace
     POSIX directory operations by Boost Filesystem"
-*   [#1555](https://github.com/googlei18n/libphonenumber/issues/1555) to allow
+*   [#1555](https://github.com/google/libphonenumber/issues/1555) to allow
     Windows to build cpp library with pthreads for multi-threading
 
 ### How to remove a specific example number?
@@ -536,3 +534,10 @@ This means we sometimes have numbers that do connect to a real person.
 If we by chance have actually listed your real number and would like it removed,
 please report this through Google's new [Issue Tracker](http://issuetracker.google.com/issues/new?component=192347).
 Only our internal team will have access to your identity (whereas GitHub usernames are public).
+
+### Why can the smallest digits of parsed numbers that are very long be incorrect when parsing in Javascript?
+
+Eg: National number of 900184080594493**87**, ```region: JP``` is parsed as
+900184080594493**90**. Reason: When the provided number is more than the max
+limit of JavaScript ```Number``` type - 2^53, JS starts rounding the value.
+libphonenumber cannot do anything better here. More details mentioned [in this issue](https://issuetracker.google.com/issues/198423548).
