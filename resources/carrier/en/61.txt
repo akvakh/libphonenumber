@@ -68,14 +68,10 @@
 61448|Telstra
 61449|Vodafone
 614493|Soul Pattinson
+6145|Telstra
 61450|Vodafone
 61451|Vodafone
 61452|Vodafone
-61455|Telstra
-61456|Telstra
-61457|Telstra
-61458|Telstra
-61459|Telstra
 6146|Telstra
 61466|Optus
 61468|Optus
@@ -107,15 +103,12 @@
 614808|Pivotel Satellite
 61481|Optus
 61482|Optus
-614830|Telstra
-614831|Telstra
-614832|Telstra
-614833|Telstra
-614838|Telstra
+61483|Telstra
 614839|Optus
 61484|Telstra
-61485|TravelSIM
+61485|Optus
 614858|Pivotel Satellite
+614859|TravelSIM
 61486|Telstra
 61487|Telstra
 61488|Telstra
@@ -128,3 +121,4 @@
 6148985|MessageBird
 614899|Pivotel Satellite
 6149|Telstra
+61495|Optus
